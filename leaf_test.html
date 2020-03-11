@@ -40,9 +40,9 @@
     {
         var travel_data = JSON.parse(response);
 
-        var location = [travel_data[0].FROM_lat, travel_data[0].FROM_lon]
+        var start_location = [20, 20]
 
-        var mymap = L.map('mapid').setView(location, 13);
+        var mymap = L.map('mapid').setView(start_location, 13).setZoom(2);
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
@@ -52,12 +52,6 @@
             tileSize: 512,
             zoomOffset: -1
         }).addTo(mymap);
-
-        L.circle(location, 80, {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5
-        }).addTo(mymap).bindPopup("I am a circle.");
 
         var color_map = {'China':'red', 'Italy':'green'}
             //, 'Singapore', 'Thailand', 'Japan', 'Taiwan', 'Malaysia',
@@ -69,13 +63,21 @@
             //AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
             var points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
                             [travel_point.TO_lat, travel_point.TO_lon] ]
-            date_stamp.innerHTML = travel_point.DATE;
-            var polygon = L.polygon(points , {color: color_map[travel_point.FROM]}).addTo(mymap);
+            // date_stamp.innerHTML = travel_point.DATE;
+            date_stamp.innerHTML = travel_point.day_of_year;
+            var polygon = L.polygon(points , {weight: 1, opacity: 0.5, color: color_map[travel_point.FROM]}).addTo(mymap);
+
+            //L.circle(location, 80, {
+                //color: 'red',
+                //fillColor: '#f03',
+                //fillOpacity: 0.5
+            //}).addTo(mymap)
+
         }
 
         for (var i in travel_data){
             var travel_point = travel_data[i];
-            setTimeout( draw_poly, i * 100, travel_point);
+            setTimeout( draw_poly, travel_point.day_of_year * 100, travel_point);
 
         }
 
