@@ -17,6 +17,7 @@
 
 
 <div id="mapid" style="width: 600px; height: 400px;"></div>
+<div id="date_stamp"></div>
 
 <script>
 
@@ -58,12 +59,18 @@
             fillOpacity: 0.5
         }).addTo(mymap).bindPopup("I am a circle.");
 
+        var color_map = {'China':'red', 'Italy':'green'}
+            //, 'Singapore', 'Thailand', 'Japan', 'Taiwan', 'Malaysia',
+            //'France', 'Iran', 'Indonesia', 'Spain', 'Latvia',
+            //'Germany', 'Egypt', 'United Arab Emirates', 'Austria',
+            //'Switzerland', 'USA/WA'
+
         function draw_poly(travel_point){
             //AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
-            var polygon = L.polygon([
-            [travel_point.FROM_lat, travel_point.FROM_lon],
-            [travel_point.TO_lat, travel_point.TO_lon]
-            ]).addTo(mymap);
+            var points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
+                            [travel_point.TO_lat, travel_point.TO_lon] ]
+            date_stamp.innerHTML = travel_point.DATE;
+            var polygon = L.polygon(points , {color: color_map[travel_point.FROM]}).addTo(mymap);
         }
 
         for (var i in travel_data){
