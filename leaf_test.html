@@ -74,11 +74,11 @@
             }
             var polygon = L.polygon(points , {weight: 1, opacity: 0.5, color: color}).addTo(mymap);
 
-            //L.circle(location, 80, {
-                //color: 'red',
-                //fillColor: '#f03',
-                //fillOpacity: 0.5
-            //}).addTo(mymap)
+            L.circle(points[1], 50, {
+                color: color,
+                fillColor: '#f03',
+                fillOpacity: 0.5
+            }).addTo(mymap)
 
         }
 
