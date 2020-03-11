@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<title>Travel viz -- leaf</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+
+	
+</head>
+<body>
+
+
+<div id="mapid" style="width: 600px; height: 400px;"></div>
+
+<script>
+
+    function loadJSON(callback) {
+        var xobj = new XMLHttpRequest();
+        //xobj.overrideMimeType("application/json");
+        xobj.open('GET', 'https://raw.githubusercontent.com/necsi/database/master/traveldataviz/NECSI-TRAVELDATAVIZ-20200309-1846.csv', true); 
+        xobj.onreadystatechange = function () {
+              if (xobj.readyState == 4 && xobj.status == "200") {
+                callback(xobj.responseText);
+              }
+        };
+        xobj.send(null);
+    }
+
+    function csvJSON(csv){
+      var lines=csv.split("\n");
+      var result = [];
+      var headers=lines[0].split(",");
+      for(var i=1;i<lines.length;i++){
+          var obj = {};
+          var currentline=lines[i].split(",");
+          for(var j=0;j<headers.length;j++){
+              obj[headers[j]] = currentline[j];
+          }
+          result.push(obj);
+      }
+      return result
+    }
+
+    loadJSON(load_response) 
+
+    function load_response(response) 
+    {
+        var travel_data = csvJSON(response);
+        //var actual_JSON = JSON.parse(response);
+
+        var location = [travel_data[0].FROM_lat, travel_data[0].FROM_lon]
+
+        var mymap = L.map('mapid').setView(location, 13);
+        //var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+                '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1
+        }).addTo(mymap);
+
+        L.circle(location, 80, {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.5
+        }).addTo(mymap).bindPopup("I am a circle.");
+
+        function draw_poly(travel_point){
+            //AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
+            var polygon = L.polygon([
+            [travel_point.FROM_lat, travel_point.FROM_lon],
+            [travel_point.TO_lat, travel_point.TO_lon]
+            ]).addTo(mymap);
+        }
+
+        for(var i = 0, size = travel_data.length; i < size ; i++){
+            var travel_point = travel_data[i];
+            setTimeout( draw_poly, i * 100, travel_point);
+
+        }
+
+    };
+
+</script>
+
+
+
+</body>
+</html>
+
