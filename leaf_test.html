@@ -16,9 +16,10 @@
 <body>
 
 
-<div id="mapid" style="width: 600px; height: 400px;"></div>
+<div id="mapid" style="width: 1000px; height: 600px;"></div>
 <div id="date_stamp"></div>
 <div id="day_stamp"></div>
+<div id="id_num"></div>
 
 <script>
 
@@ -43,7 +44,7 @@
 
         var start_location = [20, 20]
 
-        var mymap = L.map('mapid').setView(start_location, 13).setZoom(1);
+        var mymap = L.map('mapid').setView(start_location, 13).setZoom(2);
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
@@ -54,19 +55,24 @@
             zoomOffset: -1
         }).addTo(mymap);
 
-        var color_map = {'China':'red', 'Italy':'green'}
+        var color_map = {'China':'red', 'Italy':'blue', 'Iran':'green'}
             //, 'Singapore', 'Thailand', 'Japan', 'Taiwan', 'Malaysia',
             //'France', 'Iran', 'Indonesia', 'Spain', 'Latvia',
             //'Germany', 'Egypt', 'United Arab Emirates', 'Austria',
             //'Switzerland', 'USA/WA'
 
-        function draw_poly(travel_point){
+        function draw_poly(travel_point, i){
             //AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
             var points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
                             [travel_point.TO_lat, travel_point.TO_lon] ]
             date_stamp.innerHTML = 'date: ' + travel_point.date_string;
             day_stamp.innerHTML = 'day from first traveler: ' + travel_point.day_of_year;
-            var polygon = L.polygon(points , {weight: 1, opacity: 0.5, color: color_map[travel_point.FROM]}).addTo(mymap);
+            id_num.innerHTML = 'id: ' + i
+            color = color_map[travel_point.FROM]
+            if (typeof color == 'undefined') {
+                color = 'purple'
+            }
+            var polygon = L.polygon(points , {weight: 1, opacity: 0.5, color: color}).addTo(mymap);
 
             //L.circle(location, 80, {
                 //color: 'red',
@@ -78,7 +84,7 @@
 
         for (var i in travel_data){
             var travel_point = travel_data[i];
-            setTimeout( draw_poly, travel_point.day_of_year * 100, travel_point);
+            setTimeout( draw_poly, travel_point.day_of_year * 100, travel_point, i);
 
         }
 
