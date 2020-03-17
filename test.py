@@ -19,6 +19,8 @@ travel_df.loc[travel_df['FROM'] == 'USA/WA', 'FROM'] = 'US'
 travel_df.loc[travel_df['TO'] == 'USA/WA', 'TO'] = 'US'
 travel_df.loc[travel_df['FROM'] == 'China', 'FROM'] = 'CN'
 travel_df.loc[travel_df['TO'] == 'China', 'TO'] = 'CN'
+travel_df.loc[travel_df['FROM'] == 'Italy', 'FROM'] = 'IT'
+travel_df.loc[travel_df['TO'] == 'Italy', 'TO'] = 'IT'
 travel_df.to_json('NECSI-TRAVELDATAVIZ-20200309-1846.json', orient='index')
 
 ######### 
@@ -45,6 +47,7 @@ time_df['day_of_year'] = time_df['DATE'].dt.dayofyear + (time_df['DATE'].dt.year
 time_df['day_of_year'] = time_df['day_of_year'] - min_day
 time_df = time_df.drop(['Lat', 'Long'], axis=1)
 time_df.loc[time_df['Country/Region'] == 'China', 'Country/Region'] = 'CN'
+time_df.loc[time_df['Country/Region'] == 'Italy', 'Country/Region'] = 'IT'
 time_df = time_df.groupby(['day_of_year', 'Country/Region']).sum().reset_index()
 time_df = time_df.sort_values('day_of_year').reset_index(drop=True)
 time_df.to_json('time_series_19-covid-Confirmed.json', orient='index')
