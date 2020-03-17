@@ -16,14 +16,14 @@
 <body>
 
 
-<div id="mapid" style="width: 1000px; height: 600px;"></div>
+<div id="mapid" style="width: 1024px; height: 600px;"></div>
 <div id="date_stamp"></div>
 <div id="day_stamp"></div>
 <div id="id_num"></div>
 
 <script>
 
-    var start_location = [20, 20]
+    var start_location = [20, 11]
     var map = L.map('mapid').setView(start_location, 13).setZoom(2);
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
         maxZoom: 18,
