@@ -82,7 +82,6 @@
         if (typeof geojson != 'undefined') {
             geojson.remove();
         }
-
         geojson = L.geoJson(map_data, {
             style: style
             //style: style,
@@ -115,8 +114,18 @@
         if (typeof time_data != 'undefined') {
             for (var t in time_data) {
                 var data_point = time_data[t];
+                var changed = false
                 if (data_point.day_of_year == travel_point.day_of_year) {
-                    mapGeoJson(map_data)
+                    for (var m in map_data.features) {
+                        var map_point = map_data.features[m];
+                        if (map_point.properties.name == data_point['Country/Region']) {
+                            map_point.properties.scalerank = data_point['count'] 
+                        }
+                    }
+                    changed = true
+                }
+                if (changed) {
+                    //mapGeoJson(map_data)
                 }
             }
         }
