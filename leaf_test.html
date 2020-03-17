@@ -51,19 +51,19 @@
     var map_data
     function load_chlo_map(response) {
         map_data = JSON.parse(response);
-        mapGeoJson(map_data)
+        //mapGeoJson(map_data)
     }
 
 
     // get color depending on scalerank
     function getColor(d) {
-        return d > 1000 ? '#800026' :
-                d > 500  ? '#BD0026' :
-                d > 200  ? '#E31A1C' :
-                d > 100  ? '#FC4E2A' :
-                d > 50   ? '#FD8D3C' :
-                d > 20   ? '#FEB24C' :
-                d > 10   ? '#FED976' :
+        return d > 20000 ? '#800026' :
+                d > 5000  ? '#BD0026' :
+                d > 2000  ? '#E31A1C' :
+                d > 1000  ? '#FC4E2A' :
+                d > 500   ? '#FD8D3C' :
+                d > 200   ? '#FEB24C' :
+                d > 100   ? '#FED976' :
                             '#FFEDA0';
     }
     function style(feature) {
@@ -77,6 +77,7 @@
         };
     }
 
+
 	var geojson;
     function mapGeoJson(map_data) {
         if (typeof geojson != 'undefined') {
@@ -87,6 +88,7 @@
             //style: style,
             //onEachFeature: onEachFeature
         }).addTo(map);
+        geojson.bringToBack()
     }
 
     time_data_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/time_series_19-covid-Confirmed.json'
@@ -112,9 +114,9 @@
     function draw_poly(travel_point, i){
 
         if (typeof time_data != 'undefined') {
+            var changed = false
             for (var t in time_data) {
                 var data_point = time_data[t];
-                var changed = false
                 if (data_point.day_of_year == travel_point.day_of_year) {
                     for (var m in map_data.features) {
                         var map_point = map_data.features[m];
@@ -124,9 +126,11 @@
                     }
                     changed = true
                 }
-                if (changed) {
-                    //mapGeoJson(map_data)
-                }
+            }
+            if (changed) {
+                //map.invalidateSize()
+                //geojson.refresh()
+                mapGeoJson(map_data)
             }
         }
 
