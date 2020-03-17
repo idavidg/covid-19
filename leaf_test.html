@@ -37,6 +37,7 @@
 
     function load_json(url, callback) {
         var xobj = new XMLHttpRequest();
+        //xobj.addEventListener("loadend", function(ev) { alert("loadend" + ev.loaded + " of " + ev.total) });
         xobj.overrideMimeType("application/json");
         xobj.open('GET', url, true); 
         xobj.onreadystatechange = function () {
@@ -46,9 +47,10 @@
         };
         xobj.send(null);
     }
-
+    
+    var map_data
     function load_chlo_map(response) {
-        var map_data = JSON.parse(response);
+        map_data = JSON.parse(response);
         mapGeoJson(map_data)
     }
 
@@ -77,6 +79,10 @@
 
 	var geojson;
     function mapGeoJson(map_data) {
+        if (typeof geojson != 'undefined') {
+            geojson.remove();
+        }
+
         geojson = L.geoJson(map_data, {
             style: style
             //style: style,
@@ -84,8 +90,8 @@
         }).addTo(map);
     }
 
-
     time_data_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/time_series_19-covid-Confirmed.json'
+    var time_data
     load_json(time_data_url, load_time_data) 
 
     chlo_url = 'https://raw.githubusercontent.com/necsi/database/master/mapping-data/ne_count18.json' 
@@ -94,7 +100,6 @@
     travel_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/NECSI-TRAVELDATAVIZ-20200309-1846.json'
     load_json(travel_url, load_animation) 
 
-    var time_data
     function load_time_data(response) {
         time_data = JSON.parse(response);
     }
@@ -106,6 +111,16 @@
         //'Switzerland', 'USA/WA'
 
     function draw_poly(travel_point, i){
+
+        if (typeof time_data != 'undefined') {
+            for (var t in time_data) {
+                var data_point = time_data[t];
+                if (data_point.day_of_year == travel_point.day_of_year) {
+                    mapGeoJson(map_data)
+                }
+            }
+        }
+
         //AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
         var points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
                         [travel_point.TO_lat, travel_point.TO_lon] ]
