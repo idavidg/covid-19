@@ -82,11 +82,11 @@
     }
 
 
-    url = 'https://raw.githubusercontent.com/necsi/database/master/mapping-data/ne_count18.json' 
-    load_json(url, load_chlo_map) 
+    chlo_url = 'https://raw.githubusercontent.com/necsi/database/master/mapping-data/ne_count18.json' 
+    load_json(chlo_url, load_chlo_map) 
 
-    //url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/NECSI-TRAVELDATAVIZ-20200309-1846.json'
-    //load_json(url, load_animation) 
+    travel_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/NECSI-TRAVELDATAVIZ-20200309-1846.json'
+    load_json(travel_url, load_animation) 
 
     var travel_data
     function load_animation(response) 
