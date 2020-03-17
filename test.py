@@ -1,38 +1,50 @@
 #
-import pandas as pd
-df = pd.read_csv('NECSI-TRAVELDATAVIZ-20200311-0247.csv')
-# df = pd.read_json('NECSI-TRAVELDATAVIZ-20200309-1846.old.json').T
-df['DATE']=pd.to_datetime(df.DATE1, format='%Y-%m-%d', errors='coerce')
-df['date_string']=df.DATE.astype(str)
-df['day_of_year'] = df['DATE'].dt.dayofyear + (df['DATE'].dt.year - 2019) * 365
-min_day = df['day_of_year'].min()
-df['day_of_year'] = df['day_of_year'] - min_day
-df = df.sort_values('day_of_year').reset_index(drop=True)
+#  curl https://raw.githubusercontent.com/necsi/database/master/mapping-data/ne_count18.json > ne_count18.json
 
-df.to_json('NECSI-TRAVELDATAVIZ-20200309-1846.json', orient='index')
+import json
+from pandas.io.json import json_normalize
+data = json.loads(open('ne_count18.json'))
+json_normalize(data, max_level=2)
+#
+import pandas as pd
+travel_df = pd.read_csv('NECSI-TRAVELDATAVIZ-20200311-0247.csv')
+# travel_df = pd.read_json('NECSI-TRAVELDATAVIZ-20200309-1846.old.json').T
+travel_df['DATE']=pd.to_datetime(travel_df.DATE1, format='%Y-%m-%d', errors='coerce')
+travel_df['date_string']=travel_df.DATE.astype(str)
+travel_df['day_of_year'] = travel_df['DATE'].dt.dayofyear + (travel_df['DATE'].dt.year - 2019) * 365
+min_day = travel_df['day_of_year'].min()
+travel_df['day_of_year'] = travel_df['day_of_year'] - min_day
+travel_df = travel_df.sort_values('day_of_year').reset_index(drop=True)
+travel_df.loc[travel_df['FROM'] == 'USA/WA', 'FROM'] = 'US'
+travel_df.loc[travel_df['TO'] == 'USA/WA', 'TO'] = 'US'
+travel_df.loc[travel_df['FROM'] == 'China', 'FROM'] = 'CN'
+travel_df.loc[travel_df['TO'] == 'China', 'TO'] = 'CN'
+travel_df.to_json('NECSI-TRAVELDATAVIZ-20200309-1846.json', orient='index')
 
 ######### 
 # - retrieve time series from: 
 # https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv
-df = pd.read_csv('time_series_19-covid-Confirmed.csv')
+time_df = pd.read_csv('time_series_19-covid-Confirmed.csv')
 cols = ['Province/State', 'Country/Region', 'Lat', 'Long']
-ind = list(df.columns.drop(cols).values)
+ind = list(time_df.columns.drop(cols).values)
 
 # arg should be a pivot_table...
 dfs = []
 for col in ind:
-    a = df[cols + [col]].copy()
+    a = time_df[cols + [col]].copy()
     a.loc[:, 'ind'] = col
     a = a.rename(columns={col:'count'})
     dfs.append(a)
 
-df=pd.concat(dfs)
-df=df.reset_index(drop=True)
-df['DATE']=pd.to_datetime(df['ind'], format='%m/%d/%y', errors='coerce')
-df['date_string']=df.DATE.astype(str)
-df['day_of_year'] = df['DATE'].dt.dayofyear + (df['DATE'].dt.year - 2019) * 365
+time_df=pd.concat(dfs)
+time_df=time_df.reset_index(drop=True)
+time_df['DATE']=pd.to_datetime(time_df['ind'], format='%m/%d/%y', errors='coerce')
+time_df['date_string']=time_df.DATE.astype(str)
+time_df['day_of_year'] = time_df['DATE'].dt.dayofyear + (time_df['DATE'].dt.year - 2019) * 365
 # keep the min_day from above
-df['day_of_year'] = df['day_of_year'] - min_day
-df = df.sort_values('day_of_year').reset_index(drop=True)
-
-df.to_json('time_series_19-covid-Confirmed.json', orient='index')
+time_df['day_of_year'] = time_df['day_of_year'] - min_day
+time_df = time_df.drop(['Lat', 'Long'], axis=1)
+time_df.loc[time_df['Country/Region'] == 'China', 'Country/Region'] = 'CN'
+time_df = time_df.groupby(['day_of_year', 'Country/Region']).sum().reset_index()
+time_df = time_df.sort_values('day_of_year').reset_index(drop=True)
+time_df.to_json('time_series_19-covid-Confirmed.json', orient='index')

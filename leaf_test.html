@@ -57,13 +57,16 @@
 
     // get color depending on scalerank
     function getColor(d) {
-        return d > 20000 ? '#800026' :
-                d > 5000  ? '#BD0026' :
-                d > 2000  ? '#E31A1C' :
-                d > 1000  ? '#FC4E2A' :
-                d > 500   ? '#FD8D3C' :
-                d > 200   ? '#FEB24C' :
-                d > 100   ? '#FED976' :
+        if (typeof d == 'undefined') {
+            return '#FFEDA0'
+        }
+        return d > 10000 ? '#800026' :
+                d > 2000  ? '#BD0026' :
+                d > 500  ? '#E31A1C' :
+                d > 100  ? '#FC4E2A' :
+                d > 50   ? '#FD8D3C' :
+                d > 20   ? '#FEB24C' :
+                d > 10   ? '#FED976' :
                             '#FFEDA0';
     }
     function style(feature) {
@@ -73,7 +76,8 @@
             color: 'white',
             dashArray: '3',
             fillOpacity: 0.7,
-            fillColor: getColor(feature.properties.scalerank)
+            fillColor: getColor(feature.properties.count)
+            //fillColor: getColor(feature.properties.scalerank)
         };
     }
 
@@ -120,8 +124,18 @@
                 if (data_point.day_of_year == travel_point.day_of_year) {
                     for (var m in map_data.features) {
                         var map_point = map_data.features[m];
-                        if (map_point.properties.name == data_point['Country/Region']) {
-                            map_point.properties.scalerank = data_point['count'] 
+                        if ((map_point.properties.name == 'China') ||
+                            (map_point.properties.iso == 'China')) {
+                            alert('china')
+                        }
+                        if ((data_point['Country/Region'] == 'China') ||
+                            (data_point['Country/Region'] == 'China')) {
+                            alert('china 1')
+                        }
+                        if ((map_point.properties.name == data_point['Country/Region']) ||
+                            (map_point.properties.iso == data_point['Country/Region'])) {
+                            map_point.properties.count = data_point['count'] 
+                            //map_point.properties.scalerank = data_point['count'] 
                         }
                     }
                     changed = true
