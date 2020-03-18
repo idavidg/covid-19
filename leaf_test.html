@@ -141,8 +141,13 @@
             }
         }
 
-        //AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
+        // AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
+
+        xd = (travel_point.FROM_lat - travel_point.TO_lat) / 9
+        yd = (travel_point.FROM_lon - travel_point.TO_lon) / 9
         var points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
+                        [travel_point.FROM_lat - xd, travel_point.FROM_lon - yd],
+                        [travel_point.TO_lat + xd, travel_point.TO_lon + yd], 
                         [travel_point.TO_lat, travel_point.TO_lon] ]
 
         date_stamp.innerHTML = 'date: ' + travel_point.date_string;
@@ -161,11 +166,16 @@
         else {
             cum_weight[point_ref] += travel_point.NUM
         }
-        weight = cum_weight[point_ref]
+        weight = cum_weight[point_ref] * 0.3
+        if (weight < 1) {
+            weight = 1
+        }
 
-        var polygon = L.polygon(points , {weight: weight, opacity: 0.25, color: color}).addTo(map);
+        var polygon = L.polygon([points[0], points[1]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
+        var polygon = L.polygon([points[1], points[2]], {weight: weight, opacity: 0.25, color: color}).addTo(map);
+        var polygon = L.polygon([points[2], points[3]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
 
-        L.circle(points[1], 50, {
+        L.circle([travel_point.TO_lat, travel_point.TO_lon], 50, {
             color: color,
             fillColor: '#f03',
             fillOpacity: 0.5

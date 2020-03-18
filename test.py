@@ -74,13 +74,16 @@ points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
 points =  [ [travel_point.FROM_lat, travel_point.TO_lat ], 
             [travel_point.FROM_lon, travel_point.TO_lon] ]
 
-xd = (travel_point.FROM_lat - travel_point.TO_lat) / 2
-yd = (travel_point.FROM_lon - travel_point.TO_lon) / 2
+xd = (travel_point.FROM_lat - travel_point.TO_lat) / 9
+yd = (travel_point.FROM_lon - travel_point.TO_lon) / 9
+
 x =  [ travel_point.FROM_lat, 
              travel_point.FROM_lat - xd,      
+             travel_point.TO_lat + xd,      
              travel_point.TO_lat   ]
 y = [ travel_point.FROM_lon, 
             travel_point.FROM_lon - yd,
+            travel_point.TO_lon + yd,
             travel_point.TO_lon ]
 
 
