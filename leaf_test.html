@@ -120,31 +120,23 @@
 
         if (typeof time_data != 'undefined') {
             var changed = false
-            for (var t in time_data) {
-                var data_point = time_data[t];
-                if (data_point.day_of_year == travel_point.day_of_year) {
-                    for (var m in map_data.features) {
-                        var map_point = map_data.features[m];
-                        if ((map_point.properties.name == 'China') ||
-                            (map_point.properties.iso == 'China')) {
-                            alert('china')
-                        }
-                        if ((data_point['Country/Region'] == 'China') ||
-                            (data_point['Country/Region'] == 'China')) {
-                            alert('china 1')
-                        }
-                        if ((map_point.properties.name == data_point['Country/Region']) ||
-                            (map_point.properties.iso == data_point['Country/Region'])) {
-                            map_point.properties.count = data_point['count'] 
-                            //map_point.properties.scalerank = data_point['count'] 
-                        }
+            data_point = time_data[travel_point.day_of_year]
+            if (typeof data_point != 'undefined') {
+                for (var m in map_data.features) {
+                    var map_point = map_data.features[m];
+                    new_count_name = data_point[map_point.properties.name]
+                    new_count_iso = data_point[map_point.properties.iso]
+                    if (typeof new_count_name != 'undefined') {
+                        map_point.properties.count = new_count_name['count'] 
+                        changed = true
                     }
-                    changed = true
+                    if (typeof new_count_iso != 'undefined') {
+                        map_point.properties.count = new_count_iso['count'] 
+                        changed = true
+                    }
                 }
             }
             if (changed) {
-                //map.invalidateSize()
-                //geojson.refresh()
                 mapGeoJson(map_data)
             }
         }
