@@ -120,6 +120,7 @@
     function draw_poly(travel_point, i){
         if (typeof time_data != 'undefined') {
             var changed = false
+            var new_count = 0
             data_point = time_data[travel_point.day_of_year]
             if (typeof data_point != 'undefined') {
                 for (var m in map_data.features) {
@@ -127,12 +128,30 @@
                     new_count_name = data_point[map_point.properties.name]
                     new_count_iso = data_point[map_point.properties.iso]
                     if (typeof new_count_name != 'undefined') {
-                        map_point.properties.count = new_count_name['count'] 
+                        new_count = new_count_name['count'] 
                         changed = true
                     }
                     if (typeof new_count_iso != 'undefined') {
-                        map_point.properties.count = new_count_iso['count'] 
+                        new_count = new_count_iso['count'] 
                         changed = true
+                    }
+                    if (changed) {
+                        // maybe we want the new case count -- not the cummulative case count
+                        if (new_count != 0) {
+                            map_point.properties.prev_count = map_point.properties.new_count
+                            map_point.properties.new_count = new_count
+                            if (typeof map_point.properties.prev_count != 'undefined') {
+                                new_count = new_count - map_point.properties.prev_count
+                            }
+                        }
+                        // probably need to smooth data
+                        if (new_count != 0) {
+                            map_point.properties.count = new_count
+                            //if (map_point.properties.iso == 'CN') {
+                                //var msg = 'China count ' + new_count + ' ' + map_point.properties.prev_count + ' ' + map_point.properties.new_count
+                                //console.log(msg)
+                            //}
+                        }
                     }
                 }
             }
