@@ -3,8 +3,11 @@
 
 import json
 from pandas.io.json import json_normalize
-data = json.loads(open('ne_count18.json'))
+data = json.load(open('ne_count18.json'))
 json_normalize(data, max_level=2)
+
+
+
 #
 import pandas as pd
 travel_df = pd.read_csv('NECSI-TRAVELDATAVIZ-20200311-0247.csv')
@@ -49,5 +52,11 @@ time_df = time_df.drop(['Lat', 'Long'], axis=1)
 time_df.loc[time_df['Country/Region'] == 'China', 'Country/Region'] = 'CN'
 time_df.loc[time_df['Country/Region'] == 'Italy', 'Country/Region'] = 'IT'
 time_df = time_df.groupby(['day_of_year', 'Country/Region']).sum().reset_index()
-time_df = time_df.sort_values('day_of_year').reset_index(drop=True)
+
+time_df = time_df.groupby('day_of_year').apply(lambda x: x.drop(['day_of_year'], axis=1).set_index('Country/Region').to_dict(orient='index'))
+#.to_dict()
+#time_df = time_df.sort_values('day_of_year').reset_index(drop=True)
 time_df.to_json('time_series_19-covid-Confirmed.json', orient='index')
+
+
+
