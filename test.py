@@ -60,3 +60,45 @@ time_df.to_json('time_series_19-covid-Confirmed.json', orient='index')
 
 
 
+#### 
+
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+import matplotlib.cm as cm
+import numpy as np
+
+travel_point=travel_df[['TO_lat', 'TO_lon', 'FROM_lat', 'FROM_lon']].iloc[10]
+points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
+                        [travel_point.TO_lat, travel_point.TO_lon] ]
+
+points =  [ [travel_point.FROM_lat, travel_point.TO_lat ], 
+            [travel_point.FROM_lon, travel_point.TO_lon] ]
+
+xd = (travel_point.FROM_lat - travel_point.TO_lat) / 2
+yd = (travel_point.FROM_lon - travel_point.TO_lon) / 2
+x =  [ travel_point.FROM_lat, 
+             travel_point.FROM_lat - xd,      
+             travel_point.TO_lat   ]
+y = [ travel_point.FROM_lon, 
+            travel_point.FROM_lon - yd,
+            travel_point.TO_lon ]
+
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+xc = np.arange(10)
+ys = [i+xc+(i*xc)**2 for i in range(10)]
+colors = cm.rainbow(np.linspace(0, 1, len(ys)))
+
+for i, v in enumerate(x):
+    line = Line2D(x[i:i+2], y[i:i+2])
+    line.set_color(colors[i])
+    ax.add_line(line)
+
+ax.set_xlim(min(x), max(x))
+ax.set_ylim(min(y), max(y))
+
+plt.show()
+
+####
