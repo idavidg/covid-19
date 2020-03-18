@@ -110,14 +110,14 @@
         time_data = JSON.parse(response);
     }
 
-    var color_map = {'China':'red', 'Italy':'blue', 'Iran':'green'}
+    var color_map = {'China':'red', 'CN':'red', 'IT':'blue', 'Italy':'blue', 'Iran':'green'}
         //, 'Singapore', 'Thailand', 'Japan', 'Taiwan', 'Malaysia',
         //'France', 'Iran', 'Indonesia', 'Spain', 'Latvia',
         //'Germany', 'Egypt', 'United Arab Emirates', 'Austria',
         //'Switzerland', 'USA/WA'
 
+    var cum_weight = {}
     function draw_poly(travel_point, i){
-
         if (typeof time_data != 'undefined') {
             var changed = false
             data_point = time_data[travel_point.day_of_year]
@@ -147,11 +147,23 @@
         date_stamp.innerHTML = 'date: ' + travel_point.date_string;
         day_stamp.innerHTML = 'day from first traveler: ' + travel_point.day_of_year;
         id_num.innerHTML = 'id: ' + i
+
         color = color_map[travel_point.FROM]
         if (typeof color == 'undefined') {
             color = 'purple'
         }
-        var polygon = L.polygon(points , {weight: 1, opacity: 0.5, color: color}).addTo(map);
+        var point_ref =  travel_point.FROM_lat.toString() + travel_point.FROM_lon.toString() 
+                            + travel_point.TO_lat.toString() + travel_point.TO_lon.toString()  
+        if (typeof cum_weight[point_ref] == 'undefined') {
+            cum_weight[point_ref] = travel_point.NUM
+        }
+        else {
+            cum_weight[point_ref] += travel_point.NUM
+        }
+        weight = cum_weight[point_ref]
+
+        var polygon = L.polygon(points , {weight: weight, opacity: 0.25, color: color}).addTo(map);
+
         L.circle(points[1], 50, {
             color: color,
             fillColor: '#f03',
