@@ -54,21 +54,50 @@
         //mapGeoJson(map_data)
     }
 
-    // Also use the total number of new cases C. For C=0 use black. If C<3 use green, C < 20 use yellow, if C>20 and C<100 and g > 1.10 use Orange,  if C>20 and C<100 and g < 1.10 use Yellow, if C>100 and g>1.10 use red, if C>100 and 1.02<g<1.10 use Yellow, if 0.98<g<1.02 use teal, if g<0.98 use light blue. After light blue if C<10 use dark blue. This is a first shot at the algorithm.
+    // Also use the total number of new cases C. 
+    // For C=0 use black. If C<3 use green, C < 20 use yellow, 
+    // if C>20 and C<100 and g > 1.10 use Orange,  
+    // if C>20 and C<100 and g < 1.10 use Yellow, 
+    // if C>100 and g>1.10 use red, 
+    // if C>100 and 1.02<g<1.10 use Yellow, 
+    // if 0.98<g<1.02 use teal, if g<0.98 use light blue. 
+    // After light blue if C<10 use dark blue. 
 
     // get color depending on scalerank
-    function getColor(d) {
-        if (typeof d == 'undefined') {
-            return '#FFEDA0'
+    function getColor(C, g) {
+        if (typeof C == 'undefined') {
+            return '#000000' // Black
         }
-        return d > 10000 ? '#800026' :
-                d > 2000  ? '#BD0026' :
-                d > 500  ? '#E31A1C' :
-                d > 100  ? '#FC4E2A' :
-                d > 50   ? '#FD8D3C' :
-                d > 20   ? '#FEB24C' :
-                d > 10   ? '#FED976' :
-                            '#FFEDA0';
+        if (C == 0) {
+            return '#000000' // Black
+        }
+        if (C < 3) {
+            return '#008000' // Green
+        }
+        if (C < 20) {
+            return '#FFFF00' // Yellow
+        }
+        if ((C > 20) && (C < 100) && (g > 1.10)) {
+            return '#FFA500' // Orange
+        }
+        if ((C > 20) && (C < 100) && (g <= 1.10)) {
+            return '#FFFF00' // Yellow
+        }
+        if ((C > 100) && (g > 1.10)) {
+            return '#FF0000' // Red
+        }
+        if ((C > 100) && (g > 1.02) && (g <= 1.10)) {
+            return '#FFFF00' // Yellow
+        }
+        if ((g > 0.98) && (g <= 1.02)) {
+            return '#008080' // teal
+        }
+        if (g <= 0.98) {
+            return '#ADD8E6' // light blue
+        }
+        if (C < 10) {
+            return '#00008B' // dark blue
+        }
     }
     function style(feature) {
         return {
@@ -77,7 +106,7 @@
             color: 'white',
             dashArray: '3',
             fillOpacity: 0.7,
-            fillColor: getColor(feature.properties.count)
+            fillColor: getColor(feature.properties.count, feature.properties.g)
             //fillColor: getColor(feature.properties.scalerank)
         };
     }
@@ -125,18 +154,23 @@
             if (typeof data_point != 'undefined') {
                 for (var m in map_data.features) {
                     var map_point = map_data.features[m];
+                    map_point.properties.count = 0
+                    map_point.properties.g = 0
                     curr_count_name = data_point[map_point.properties.name]
                     curr_count_iso = data_point[map_point.properties.iso]
                     if (typeof curr_count_name != 'undefined') {
-                        curr_count = curr_count_name['count'] 
+                        curr_count = curr_count_name['C'] 
+                        curr_g = curr_count_name['g'] 
                         changed = true
                     }
                     if (typeof curr_count_iso != 'undefined') {
-                        curr_count = curr_count_iso['count'] 
+                        curr_count = curr_count_iso['C'] 
+                        curr_g = curr_count_iso['g'] 
                         changed = true
                     }
                     if (changed) {
                         map_point.properties.count = curr_count
+                        map_point.properties.g = curr_g
                     }
                 }
             }
