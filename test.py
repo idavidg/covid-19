@@ -53,10 +53,30 @@ time_df.loc[time_df['Country/Region'] == 'China', 'Country/Region'] = 'CN'
 time_df.loc[time_df['Country/Region'] == 'Italy', 'Country/Region'] = 'IT'
 time_df = time_df.groupby(['day_of_year', 'Country/Region']).sum().reset_index()
 
-time_df = time_df.groupby('day_of_year').apply(lambda x: x.drop(['day_of_year'], axis=1).set_index('Country/Region').to_dict(orient='index'))
+
+# calculate C & g
+# Lets try to set an algorithm based upon the fractional change per day in new cases g = (Delta C/C) where C is the number of new cases 
+#   (so this is a second order difference_, averaged over past three days (use weighting 1/4, 1/4, 1/2). 
+
+def calc_g(grp):
+    a = grp.copy().reset_index()
+    a['c1'] = a['count'].shift(1)
+    a['d1'] = a['count'] - a['c1']
+    a['d2'] = a['d1'].shift(1)
+    a['d3'] = a['d1'].shift(2)
+    a['C'] = (a['d1'] * 0.5) + (a['d2'] * 0.25) + (a['d3'] * 0.25)
+    a['g'] = (a['C'] - a['C'].shift(1)) / a['C']
+    a = a.drop(['c1', 'd1', 'd2', 'd3'], axis=1)
+    return a
+
+new_time = time_df.groupby(['Country/Region']).apply(calc_g)
+#new_time = new_time.drop('index', axis=1)
+#new_time[new_time['Country/Region'] == 'CN']
+
+new_time = new_time.groupby('day_of_year').apply(lambda x: x.drop(['day_of_year'], axis=1).set_index('Country/Region').to_dict(orient='index'))
 #.to_dict()
-#time_df = time_df.sort_values('day_of_year').reset_index(drop=True)
-time_df.to_json('time_series_19-covid-Confirmed.json', orient='index')
+#new_time = new_time.sort_values('day_of_year').reset_index(drop=True)
+new_time.to_json('time_series_19-covid-Confirmed.json', orient='index')
 
 
 
