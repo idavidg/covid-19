@@ -47,12 +47,7 @@
         };
         xobj.send(null);
     }
-    
-    var map_data
-    function load_chlo_map(response) {
-        map_data = JSON.parse(response);
-        //mapGeoJson(map_data)
-    }
+
 
     // Also use the total number of new cases C. 
     // For C=0 use black. If C<3 use green, C < 20 use yellow, 
@@ -125,19 +120,33 @@
         geojson.bringToBack()
     }
 
-    time_data_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/time_series_19-covid-Confirmed.json'
+    var policy_data
+    policy_data_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/policy_act.json'
+    load_json(policy_data_url, load_policy_data) 
+    function load_policy_data(response) {
+        policy_data = JSON.parse(response);
+    }
+
     var time_data
+    time_data_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/time_series_19-covid-Confirmed.json'
     load_json(time_data_url, load_time_data) 
-
-    //chlo_url = 'https://raw.githubusercontent.com/necsi/database/master/mapping-data/ne_count18.json' 
-    chlo_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/ne_count18.json'
-    load_json(chlo_url, load_chlo_map) 
-
-    travel_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/NECSI-TRAVELDATAVIZ-20200319-1957.json'
-    load_json(travel_url, load_animation) 
-
     function load_time_data(response) {
         time_data = JSON.parse(response);
+    }
+
+    var map_data
+    chlo_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/ne_count18.json'
+    load_json(chlo_url, load_chlo_map) 
+    function load_chlo_map(response) {
+        map_data = JSON.parse(response);
+        //mapGeoJson(map_data)
+    }
+
+    var travel_data
+    travel_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/NECSI-TRAVELDATAVIZ-20200319-1957.json'
+    load_json(travel_url, load_travel_data) 
+    function load_travel_data(response) {
+        travel_data = JSON.parse(response);
     }
 
     var color_map = {'China':'red', 'CN':'red', 'IT':'blue', 'Italy':'blue', 'Iran':'green'}
@@ -147,86 +156,96 @@
         //'Switzerland', 'USA/WA'
 
     var cum_weight = {}
-    function draw_poly(travel_point, i){
-        if (typeof time_data != 'undefined') {
-            var changed = false
-            data_point = time_data[travel_point.day_of_year]
-            if (typeof data_point != 'undefined') {
-                for (var m in map_data.features) {
-                    var map_point = map_data.features[m];
-                    map_point.properties.count = 0
-                    map_point.properties.g = 0
-                    curr_count_name = data_point[map_point.properties.name]
-                    curr_count_iso = data_point[map_point.properties.iso]
-                    if (typeof curr_count_name != 'undefined') {
-                        curr_count = curr_count_name['C'] 
-                        curr_g = curr_count_name['g'] 
-                        changed = true
-                    }
-                    if (typeof curr_count_iso != 'undefined') {
-                        curr_count = curr_count_iso['C'] 
-                        curr_g = curr_count_iso['g'] 
-                        changed = true
-                    }
-                    if (changed) {
-                        map_point.properties.count = curr_count
-                        map_point.properties.g = curr_g
-                    }
+    function draw_poly(time_point, i){
+        if (typeof policy_data != 'undefined') {
+            policy_point = policy_data[time_point.day_of_year]
+        }
+        if (typeof travel_data != 'undefined') {
+            travel_point = travel_data[time_point.day_of_year]
+        }
+
+        var changed = false
+        // so do we go with time_data or ... policy_data
+        if (typeof map_data != 'undefined') {
+            for (var m in map_data.features) {
+                var map_point = map_data.features[m];
+                map_point.properties.count = 0
+                map_point.properties.g = 0
+
+                curr_count_name = time_point[map_point.properties.name]
+                curr_count_iso = time_point[map_point.properties.iso]
+                if (typeof curr_count_name != 'undefined') {
+                    curr_count = curr_count_name['C'] 
+                    curr_g = curr_count_name['g'] 
+                    changed = true
+                }
+                if (typeof curr_count_iso != 'undefined') {
+                    curr_count = curr_count_iso['C'] 
+                    curr_g = curr_count_iso['g'] 
+                    changed = true
+                }
+
+                if (changed) {
+                    map_point.properties.count = curr_count
+                    map_point.properties.g = curr_g
                 }
             }
-            if (changed) {
-                mapGeoJson(map_data)
+        }
+        if (changed) {
+            mapGeoJson(map_data)
+        }
+
+        // FROM HERE we do travel lines --
+        if (typeof travel_point != 'undefined') {
+            // AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
+            xd = (travel_point.FROM_lat - travel_point.TO_lat) / 9
+            yd = (travel_point.FROM_lon - travel_point.TO_lon) / 9
+            var points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
+                            [travel_point.FROM_lat - xd, travel_point.FROM_lon - yd],
+                            [travel_point.TO_lat + xd, travel_point.TO_lon + yd], 
+                            [travel_point.TO_lat, travel_point.TO_lon] ]
+
+            date_stamp.innerHTML = 'date: ' + travel_point.date_string;
+            day_stamp.innerHTML = 'day from first traveler: ' + travel_point.day_of_year;
+            id_num.innerHTML = 'id: ' + i
+
+            color = color_map[travel_point.FROM]
+            if (typeof color == 'undefined') {
+                color = 'purple'
             }
+            var point_ref =  travel_point.FROM_lat.toString() + travel_point.FROM_lon.toString() 
+                                + travel_point.TO_lat.toString() + travel_point.TO_lon.toString()  
+            if (typeof cum_weight[point_ref] == 'undefined') {
+                cum_weight[point_ref] = travel_point.NUM
+            }
+            else {
+                cum_weight[point_ref] += travel_point.NUM
+            }
+            weight = cum_weight[point_ref] * 0.3
+            if (weight < 1) {
+                weight = 1
+            }
+
+            var polygon = L.polygon([points[0], points[1]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
+            var polygon = L.polygon([points[1], points[2]], {weight: weight, opacity: 0.25, color: color}).addTo(map);
+            var polygon = L.polygon([points[2], points[3]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
+
+            L.circle([travel_point.TO_lat, travel_point.TO_lon], 50, {
+                color: color,
+                fillColor: '#f03',
+                fillOpacity: 0.5
+            }).addTo(map)
         }
 
-        // AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
-
-        xd = (travel_point.FROM_lat - travel_point.TO_lat) / 9
-        yd = (travel_point.FROM_lon - travel_point.TO_lon) / 9
-        var points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
-                        [travel_point.FROM_lat - xd, travel_point.FROM_lon - yd],
-                        [travel_point.TO_lat + xd, travel_point.TO_lon + yd], 
-                        [travel_point.TO_lat, travel_point.TO_lon] ]
-
-        date_stamp.innerHTML = 'date: ' + travel_point.date_string;
-        day_stamp.innerHTML = 'day from first traveler: ' + travel_point.day_of_year;
-        id_num.innerHTML = 'id: ' + i
-
-        color = color_map[travel_point.FROM]
-        if (typeof color == 'undefined') {
-            color = 'purple'
-        }
-        var point_ref =  travel_point.FROM_lat.toString() + travel_point.FROM_lon.toString() 
-                            + travel_point.TO_lat.toString() + travel_point.TO_lon.toString()  
-        if (typeof cum_weight[point_ref] == 'undefined') {
-            cum_weight[point_ref] = travel_point.NUM
-        }
-        else {
-            cum_weight[point_ref] += travel_point.NUM
-        }
-        weight = cum_weight[point_ref] * 0.3
-        if (weight < 1) {
-            weight = 1
-        }
-
-        var polygon = L.polygon([points[0], points[1]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
-        var polygon = L.polygon([points[1], points[2]], {weight: weight, opacity: 0.25, color: color}).addTo(map);
-        var polygon = L.polygon([points[2], points[3]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
-
-        L.circle([travel_point.TO_lat, travel_point.TO_lon], 50, {
-            color: color,
-            fillColor: '#f03',
-            fillOpacity: 0.5
-        }).addTo(map)
     }
 
-    var travel_data
-    function load_animation(response) {
-        travel_data = JSON.parse(response);
+    # on a button push -- state: 0:count, 1:acceleration, 2:travel policy
+    load_animation() 
 
-        for (var i in travel_data){
-            var travel_point = travel_data[i];
-            setTimeout( draw_poly, travel_point.day_of_year * 200, travel_point, i);
+    function load_animation() {
+        for (var i in time_data){
+            var time_point = time_data[i];
+            setTimeout( draw_poly, time_point.day_of_year * 200, time_point, i);
         }
     };
 

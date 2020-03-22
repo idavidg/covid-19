@@ -38,6 +38,7 @@ policy_df.loc[policy_df['country'] == 'China', 'country'] = 'CN'
 policy_df.loc[policy_df['country'] == 'Italy', 'country'] = 'IT'
 policy_df.loc[policy_df['country'] == 'United Kingdom of Great Britain & Northern Ireland', 'country'] = 'UK'
 policy_df = policy_df.drop(['alltext', 'text'], axis=1)
+policy_df = policy_df.groupby('day_of_year').apply(lambda x: x.drop(['day_of_year'], axis=1).set_index('country').to_dict(orient='index'))
 policy_df.to_json('policy_act.json', orient='index')
 
 ######### 
