@@ -15,6 +15,7 @@ travel_df = pd.read_csv('NECSI-TRAVELDATAVIZ-20200319-1957.csv')
 travel_df['DATE']=pd.to_datetime(travel_df.DATE1, format='%Y-%m-%d', errors='coerce')
 travel_df['date_string']=travel_df.DATE.astype(str)
 travel_df['day_of_year'] = travel_df['DATE'].dt.dayofyear + (travel_df['DATE'].dt.year - 2019) * 365
+travel_df['day_of_year'] = travel_df['day_of_year'].astype(int) 
 travel_df = travel_df.sort_values('day_of_year')
 travel_df = travel_df[1:]
 min_day = travel_df['day_of_year'].min()
@@ -34,7 +35,8 @@ travel_df.to_json('NECSI-TRAVELDATAVIZ-20200319-1957.json', orient='index')
 
 policy_df = pd.read_csv('NECSI-TRAVELDATAVIZ-POLICYACT-20200321-1733.csv')
 policy_df['DATE']=pd.to_datetime(policy_df.date1, format='%Y-%m-%d', errors='coerce')
-policy_df['day_of_year'] = policy_df['DATE'].dt.dayofyear + (travel_df['DATE'].dt.year - 2019) * 365
+policy_df['day_of_year'] = policy_df['DATE'].dt.dayofyear + (policy_df['DATE'].dt.year - 2019) * 365
+policy_df['day_of_year'] = policy_df['day_of_year'].astype(int) 
 policy_df['day_of_year'] = policy_df['day_of_year'] - min_day
 policy_df.loc[policy_df['country'] == 'United States of America', 'country'] = 'US'
 policy_df.loc[policy_df['country'] == 'China', 'country'] = 'CN'
@@ -64,6 +66,7 @@ time_df=time_df.reset_index(drop=True)
 time_df['DATE']=pd.to_datetime(time_df['ind'], format='%m/%d/%y', errors='coerce')
 time_df['date_string']=time_df.DATE.astype(str)
 time_df['day_of_year'] = time_df['DATE'].dt.dayofyear + (time_df['DATE'].dt.year - 2019) * 365
+time_df['day_of_year'] = time_df['day_of_year'].astype(int) 
 # keep the min_day from above
 time_df['day_of_year'] = time_df['day_of_year'] - min_day
 time_df = time_df.drop(['Lat', 'Long'], axis=1)

@@ -165,36 +165,46 @@
             travel_points = travel_data[day_of_year]
         }
 
-        var changed = false
+        state = 'acceleration'
+        state = 'policy'
         // so do we go with time_data or ... policy_data
         if (typeof map_data != 'undefined') {
             for (var m in map_data.features) {
                 var map_point = map_data.features[m];
-                map_point.properties.count = 0
-                map_point.properties.g = 0
+                curr_count = 0
+                curr_g = 0
 
-                curr_count_name = time_point[map_point.properties.name]
-                curr_count_iso = time_point[map_point.properties.iso]
-                if (typeof curr_count_name != 'undefined') {
-                    curr_count = curr_count_name['C'] 
-                    curr_g = curr_count_name['g'] 
-                    changed = true
-                }
-                if (typeof curr_count_iso != 'undefined') {
-                    curr_count = curr_count_iso['C'] 
-                    curr_g = curr_count_iso['g'] 
-                    changed = true
+                if ((typeof policy_point == 'undefined') && (state != 'policy')) {
+                    curr_count_name = policy_point[map_point.properties.name]
+                    curr_count_iso = policy_point[map_point.properties.iso]
+                    if (typeof curr_count_name != 'undefined') {
+                        curr_count = 10
+                        curr_g = 10
+                    }
+                    if (typeof curr_count_iso != 'undefined') {
+                        curr_count = 10
+                        curr_g = 10
+                    }
                 }
 
-                if (changed) {
-                    map_point.properties.count = curr_count
-                    map_point.properties.g = curr_g
+                if (state == 'acceleration') {
+                    curr_count_name = time_point[map_point.properties.name]
+                    curr_count_iso = time_point[map_point.properties.iso]
+                    if (typeof curr_count_name != 'undefined') {
+                        curr_count = curr_count_name['C'] 
+                        curr_g = curr_count_name['g'] 
+                    }
+                    if (typeof curr_count_iso != 'undefined') {
+                        curr_count = curr_count_iso['C'] 
+                        curr_g = curr_count_iso['g'] 
+                    }
                 }
+
+                map_point.properties.count = curr_count
+                map_point.properties.g = curr_g
             }
         }
-        if (changed) {
-            mapGeoJson(map_data)
-        }
+        mapGeoJson(map_data)
 
         // FROM HERE we do travel lines --
         if (typeof travel_points != 'undefined') {
