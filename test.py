@@ -15,6 +15,8 @@ travel_df = pd.read_csv('NECSI-TRAVELDATAVIZ-20200319-1957.csv')
 travel_df['DATE']=pd.to_datetime(travel_df.DATE1, format='%Y-%m-%d', errors='coerce')
 travel_df['date_string']=travel_df.DATE.astype(str)
 travel_df['day_of_year'] = travel_df['DATE'].dt.dayofyear + (travel_df['DATE'].dt.year - 2019) * 365
+travel_df = travel_df.sort_values('day_of_year')
+travel_df = travel_df[1:]
 min_day = travel_df['day_of_year'].min()
 travel_df['day_of_year'] = travel_df['day_of_year'] - min_day
 travel_df = travel_df.sort_values('day_of_year').reset_index(drop=True)
