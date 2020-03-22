@@ -7,10 +7,10 @@ data = json.load(open('ne_count18.json'))
 json_normalize(data, max_level=2)
 
 
-
 #
 import pandas as pd
-travel_df = pd.read_csv('NECSI-TRAVELDATAVIZ-20200311-0247.csv')
+# https://raw.githubusercontent.com/necsi/database/master/traveldataviz/NECSI-TRAVELDATAVIZ-20200319-1957.csv
+travel_df = pd.read_csv('NECSI-TRAVELDATAVIZ-20200319-1957.csv')
 # travel_df = pd.read_json('NECSI-TRAVELDATAVIZ-20200309-1846.old.json').T
 travel_df['DATE']=pd.to_datetime(travel_df.DATE1, format='%Y-%m-%d', errors='coerce')
 travel_df['date_string']=travel_df.DATE.astype(str)
@@ -24,7 +24,21 @@ travel_df.loc[travel_df['FROM'] == 'China', 'FROM'] = 'CN'
 travel_df.loc[travel_df['TO'] == 'China', 'TO'] = 'CN'
 travel_df.loc[travel_df['FROM'] == 'Italy', 'FROM'] = 'IT'
 travel_df.loc[travel_df['TO'] == 'Italy', 'TO'] = 'IT'
-travel_df.to_json('NECSI-TRAVELDATAVIZ-20200309-1846.json', orient='index')
+travel_df.to_json('NECSI-TRAVELDATAVIZ-20200319-1957.json', orient='index')
+#
+
+
+
+policy_df = pd.read_csv('NECSI-TRAVELDATAVIZ-POLICYACT-20200321-1733.csv')
+policy_df['DATE']=pd.to_datetime(policy_df.date1, format='%Y-%m-%d', errors='coerce')
+policy_df['day_of_year'] = policy_df['DATE'].dt.dayofyear + (travel_df['DATE'].dt.year - 2019) * 365
+policy_df['day_of_year'] = policy_df['day_of_year'] - min_day
+policy_df.loc[policy_df['country'] == 'United States of America', 'country'] = 'US'
+policy_df.loc[policy_df['country'] == 'China', 'country'] = 'CN'
+policy_df.loc[policy_df['country'] == 'Italy', 'country'] = 'IT'
+policy_df.loc[policy_df['country'] == 'United Kingdom of Great Britain & Northern Ireland', 'country'] = 'UK'
+policy_df = policy_df.drop(['alltext', 'text'], axis=1)
+policy_df.to_json('policy_act.json', orient='index')
 
 ######### 
 # - retrieve time series from: 
