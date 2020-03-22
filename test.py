@@ -26,6 +26,7 @@ travel_df.loc[travel_df['FROM'] == 'China', 'FROM'] = 'CN'
 travel_df.loc[travel_df['TO'] == 'China', 'TO'] = 'CN'
 travel_df.loc[travel_df['FROM'] == 'Italy', 'FROM'] = 'IT'
 travel_df.loc[travel_df['TO'] == 'Italy', 'TO'] = 'IT'
+travel_df = travel_df.groupby('day_of_year').apply(lambda x: x.drop(['day_of_year'], axis=1).set_index('FROM').to_dict(orient='index'))
 travel_df.to_json('NECSI-TRAVELDATAVIZ-20200319-1957.json', orient='index')
 #
 

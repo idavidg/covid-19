@@ -162,7 +162,7 @@
             policy_point = policy_data[day_of_year]
         }
         if (typeof travel_data != 'undefined') {
-            travel_point = travel_data[day_of_year]
+            travel_points = travel_data[day_of_year]
         }
 
         var changed = false
@@ -197,41 +197,45 @@
         }
 
         // FROM HERE we do travel lines --
-        if (typeof travel_point != 'undefined') {
-            // AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
-            xd = (travel_point.FROM_lat - travel_point.TO_lat) / 9
-            yd = (travel_point.FROM_lon - travel_point.TO_lon) / 9
-            var points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
-                            [travel_point.FROM_lat - xd, travel_point.FROM_lon - yd],
-                            [travel_point.TO_lat + xd, travel_point.TO_lon + yd], 
-                            [travel_point.TO_lat, travel_point.TO_lon] ]
+        if (typeof travel_points != 'undefined') {
+            for (var t in travel_points) {
+                travel_point = travel_points[t]
 
-            color = color_map[travel_point.FROM]
-            if (typeof color == 'undefined') {
-                color = 'purple'
-            }
-            var point_ref =  travel_point.FROM_lat.toString() + travel_point.FROM_lon.toString() 
-                                + travel_point.TO_lat.toString() + travel_point.TO_lon.toString()  
-            if (typeof cum_weight[point_ref] == 'undefined') {
-                cum_weight[point_ref] = travel_point.NUM
-            }
-            else {
-                cum_weight[point_ref] += travel_point.NUM
-            }
-            weight = cum_weight[point_ref] * 0.3
-            if (weight < 1) {
-                weight = 1
-            }
+                // AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
+                xd = (travel_point.FROM_lat - travel_point.TO_lat) / 9
+                yd = (travel_point.FROM_lon - travel_point.TO_lon) / 9
+                var points =  [ [travel_point.FROM_lat, travel_point.FROM_lon],
+                                [travel_point.FROM_lat - xd, travel_point.FROM_lon - yd],
+                                [travel_point.TO_lat + xd, travel_point.TO_lon + yd], 
+                                [travel_point.TO_lat, travel_point.TO_lon] ]
 
-            var polygon = L.polygon([points[0], points[1]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
-            var polygon = L.polygon([points[1], points[2]], {weight: weight, opacity: 0.25, color: color}).addTo(map);
-            var polygon = L.polygon([points[2], points[3]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
+                color = color_map[travel_point.FROM]
+                if (typeof color == 'undefined') {
+                    color = 'purple'
+                }
+                var point_ref =  travel_point.FROM_lat.toString() + travel_point.FROM_lon.toString() 
+                                    + travel_point.TO_lat.toString() + travel_point.TO_lon.toString()  
+                if (typeof cum_weight[point_ref] == 'undefined') {
+                    cum_weight[point_ref] = travel_point.NUM
+                }
+                else {
+                    cum_weight[point_ref] += travel_point.NUM
+                }
+                weight = cum_weight[point_ref] * 0.3
+                if (weight < 1) {
+                    weight = 1
+                }
 
-            L.circle([travel_point.TO_lat, travel_point.TO_lon], 50, {
-                color: color,
-                fillColor: '#f03',
-                fillOpacity: 0.5
-            }).addTo(map)
+                var polygon = L.polygon([points[0], points[1]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
+                var polygon = L.polygon([points[1], points[2]], {weight: weight, opacity: 0.25, color: color}).addTo(map);
+                var polygon = L.polygon([points[2], points[3]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
+
+                L.circle([travel_point.TO_lat, travel_point.TO_lon], 50, {
+                    color: color,
+                    fillColor: '#f03',
+                    fillOpacity: 0.5
+                }).addTo(map)
+            }
         }
 
     }
