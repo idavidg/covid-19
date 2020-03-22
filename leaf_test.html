@@ -17,9 +17,7 @@
 
 
 <div id="mapid" style="width: 1024px; height: 600px;"></div>
-<div id="date_stamp"></div>
 <div id="day_stamp"></div>
-<div id="id_num"></div>
 
 <script>
 
@@ -134,19 +132,20 @@
         time_data = JSON.parse(response);
     }
 
-    var map_data
-    chlo_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/ne_count18.json'
-    load_json(chlo_url, load_chlo_map) 
-    function load_chlo_map(response) {
-        map_data = JSON.parse(response);
-        //mapGeoJson(map_data)
-    }
-
     var travel_data
     travel_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/NECSI-TRAVELDATAVIZ-20200319-1957.json'
     load_json(travel_url, load_travel_data) 
     function load_travel_data(response) {
         travel_data = JSON.parse(response);
+    }
+
+    var map_data
+    chlo_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/ne_count18.json'
+    load_json(chlo_url, load_chlo_map) 
+    function load_chlo_map(response) {
+        map_data = JSON.parse(response);
+        // on a button push -- state: 0:count, 1:acceleration, 2:travel policy
+        load_animation() 
     }
 
     var color_map = {'China':'red', 'CN':'red', 'IT':'blue', 'Italy':'blue', 'Iran':'green'}
@@ -156,12 +155,14 @@
         //'Switzerland', 'USA/WA'
 
     var cum_weight = {}
-    function draw_poly(time_point, i){
+    function draw_poly(time_point, day_of_year){
+        day_stamp.innerHTML = 'day from event: ' + day_of_year;
+
         if (typeof policy_data != 'undefined') {
-            policy_point = policy_data[time_point.day_of_year]
+            policy_point = policy_data[day_of_year]
         }
         if (typeof travel_data != 'undefined') {
-            travel_point = travel_data[time_point.day_of_year]
+            travel_point = travel_data[day_of_year]
         }
 
         var changed = false
@@ -205,10 +206,6 @@
                             [travel_point.TO_lat + xd, travel_point.TO_lon + yd], 
                             [travel_point.TO_lat, travel_point.TO_lon] ]
 
-            date_stamp.innerHTML = 'date: ' + travel_point.date_string;
-            day_stamp.innerHTML = 'day from first traveler: ' + travel_point.day_of_year;
-            id_num.innerHTML = 'id: ' + i
-
             color = color_map[travel_point.FROM]
             if (typeof color == 'undefined') {
                 color = 'purple'
@@ -239,13 +236,10 @@
 
     }
 
-    // on a button push -- state: 0:count, 1:acceleration, 2:travel policy
-    load_animation() 
-
     function load_animation() {
-        for (var i in time_data){
-            var time_point = time_data[i];
-            setTimeout( draw_poly, time_point.day_of_year * 200, time_point, i);
+        for (var day_of_year in time_data){
+            var time_point = time_data[day_of_year];
+            setTimeout(draw_poly, day_of_year * 200, time_point, day_of_year);
         }
     };
 
