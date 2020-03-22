@@ -165,7 +165,7 @@
             travel_points = travel_data[day_of_year]
         }
 
-        state = 'acceleration'
+        // state = 'acceleration'
         state = 'policy'
         // so do we go with time_data or ... policy_data
         if (typeof map_data != 'undefined') {
@@ -174,7 +174,7 @@
                 curr_count = 0
                 curr_g = 0
 
-                if ((typeof policy_point == 'undefined') && (state != 'policy')) {
+                if ((typeof policy_point != 'undefined') && (state == 'policy')) {
                     curr_count_name = policy_point[map_point.properties.name]
                     curr_count_iso = policy_point[map_point.properties.iso]
                     if (typeof curr_count_name != 'undefined') {
