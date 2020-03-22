@@ -198,8 +198,8 @@
 
         // FROM HERE we do travel lines --
         if (typeof travel_points != 'undefined') {
-            for (var t in travel_points) {
-                travel_point = travel_points[t]
+            for (var from in travel_points) {
+                travel_point = travel_points[from]
 
                 // AGE,SEX,NUM,TO,FROM,DATE,TO_lat,TO_lon,FROM_lat,FROM_lon
                 xd = (travel_point.FROM_lat - travel_point.TO_lat) / 9
@@ -209,7 +209,7 @@
                                 [travel_point.TO_lat + xd, travel_point.TO_lon + yd], 
                                 [travel_point.TO_lat, travel_point.TO_lon] ]
 
-                color = color_map[travel_point.FROM]
+                color = color_map[from]
                 if (typeof color == 'undefined') {
                     color = 'purple'
                 }
@@ -221,7 +221,7 @@
                 else {
                     cum_weight[point_ref] += travel_point.NUM
                 }
-                weight = cum_weight[point_ref] * 0.3
+                weight = cum_weight[point_ref] * 0.7
                 if (weight < 1) {
                     weight = 1
                 }
