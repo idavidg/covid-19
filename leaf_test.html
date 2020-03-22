@@ -28,7 +28,7 @@
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
             '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        id: 'mapbox/streets-v11',
+        id: 'mapbox/light-v10',
         tileSize: 512,
         zoomOffset: -1
     }).addTo(map);
@@ -59,7 +59,8 @@
     // get color depending on scalerank
     function getColor(C, g) {
         if (typeof C == 'undefined') {
-            return '#000000' // Black
+            // return '#000000' // Black
+	    return '#d2f4dc' // light green // <<-- Changed	
         }
         if (C == 0) {
             return '#000000' // Black
@@ -68,7 +69,8 @@
             return '#008000' // Green
         }
         if (C < 20) {
-            return '#FFFF00' // Yellow
+            // return '#FFFF00' // Yellow
+            return '#f9924c' // light orange // <<-- Changed	
         }
         if ((C > 20) && (C < 100) && (g > 1.10)) {
             return '#FFA500' // Orange
@@ -95,8 +97,10 @@
     function style(feature) {
         return {
             weight: 2,
-            opacity: 1,
-            color: 'white',
+            opacity: 0.5, // <<-- Changed
+            // color: 'white',
+	    color: 'gray', // <<-- Changed
+		
             dashArray: '3',
             fillOpacity: 0.7,
             fillColor: getColor(feature.properties.count, feature.properties.g)
@@ -236,14 +240,14 @@
                 else {
                     cum_weight[point_ref] += travel_point.NUM
                 }
-                weight = cum_weight[point_ref] * 0.7
+                weight = cum_weight[point_ref] * 0.5 // <<-- Changed
                 if (weight < 1) {
                     weight = 1
                 }
 
-                var polygon = L.polygon([points[0], points[1]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
-                var polygon = L.polygon([points[1], points[2]], {weight: weight, opacity: 0.25, color: color}).addTo(map);
-                var polygon = L.polygon([points[2], points[3]], {weight: 1, opacity: 0.5, color: color}).addTo(map);
+                var polygon = L.polygon([points[0], points[1]], {weight: 1, opacity: 0.7, color: color}).addTo(map); // <<-- Changed
+                var polygon = L.polygon([points[1], points[2]], {weight: weight, opacity: 0.7, color: color}).addTo(map); // <<-- Changed
+                var polygon = L.polygon([points[2], points[3]], {weight: 1, opacity: 0.7, color: color}).addTo(map); // <<-- Changed
 
                 L.circle([travel_point.TO_lat, travel_point.TO_lon], 50, {
                     color: color,
