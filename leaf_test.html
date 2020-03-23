@@ -17,6 +17,13 @@
 
 
 <div id="mapid" style="width: 1024px; height: 600px;"></div>
+<div>
+<div id="data_arrival"></div>
+<input id="clickMe" type="button" value="run policy" onclick="doPolicy();" />
+<br>
+<input id="accelMe" type="button" value="run acceleration" onclick="doAccel();" />
+</div>
+<br>
 <div id="day_stamp"></div>
 
 <script>
@@ -33,6 +40,19 @@
         zoomOffset: -1
     }).addTo(map);
 
+    // state = 'acceleration'
+    state = 'policy'
+    function doPolicy() {
+        state = 'policy'
+        load_animation() 
+    }
+
+    function doAccel() {
+        state = 'acceleration'
+        load_animation() 
+    }
+
+    
     function load_json(url, callback) {
         var xobj = new XMLHttpRequest();
         //xobj.addEventListener("loadend", function(ev) { alert("loadend" + ev.loaded + " of " + ev.total) });
@@ -118,6 +138,7 @@
         geojson.bringToBack()
     }
 
+    data_arrival.innerHTML = 'loading...';
     var policy_data
     policy_data_url = 'https://raw.githubusercontent.com/idavidg/covid-19/master/policy_act.json'
     load_json(policy_data_url, load_policy_data) 
@@ -144,8 +165,8 @@
     load_json(chlo_url, load_chlo_map) 
     function load_chlo_map(response) {
         map_data = JSON.parse(response);
-        // on a button push -- state: 0:count, 1:acceleration, 2:travel policy
-        load_animation() 
+        data_arrival.innerHTML = 'data here!';
+        // load_animation() 
     }
 
     var color_map = {'China':'red', 'CN':'red', 'IT':'blue', 'Italy':'blue', 'Iran':'green'}
@@ -165,8 +186,6 @@
             travel_points = travel_data[day_of_year]
         }
 
-        // state = 'acceleration'
-        state = 'policy'
         // so do we go with time_data or ... policy_data
         if (typeof map_data != 'undefined') {
             for (var m in map_data.features) {

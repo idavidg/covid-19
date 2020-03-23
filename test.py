@@ -6,6 +6,8 @@ from pandas.io.json import json_normalize
 data = json.load(open('ne_count18.json'))
 json_normalize(data, max_level=2)
 
+iso_names = pd.read_csv('iso_names.csv')
+
 
 #
 import pandas as pd
@@ -21,12 +23,18 @@ travel_df = travel_df[1:]
 min_day = travel_df['day_of_year'].min()
 travel_df['day_of_year'] = travel_df['day_of_year'] - min_day
 travel_df = travel_df.sort_values('day_of_year').reset_index(drop=True)
-travel_df.loc[travel_df['FROM'] == 'USA/WA', 'FROM'] = 'US'
-travel_df.loc[travel_df['TO'] == 'USA/WA', 'TO'] = 'US'
-travel_df.loc[travel_df['FROM'] == 'China', 'FROM'] = 'CN'
-travel_df.loc[travel_df['TO'] == 'China', 'TO'] = 'CN'
-travel_df.loc[travel_df['FROM'] == 'Italy', 'FROM'] = 'IT'
-travel_df.loc[travel_df['TO'] == 'Italy', 'TO'] = 'IT'
+
+names = pd.DataFrame(['Malaysia', 'Taiwan', 'Japan', 'Thailand', 'Singapore',
+       'Italy', 'Germany', 'France', 'Spain', 'Indonesia', 'Iran',
+       'Egypt', 'US', 'Argentina', 'Latvia', 'Austria',
+       'United Arab Emirates', 'Switzerland', 'Albania', 'Ecuador',
+       'India', 'Ireland', 'Bahrain', 'United Kingdom', 'Portugal'], columns=['Country'])
+more_names =  names.merge(iso_names, on='Country')[['Country', 'Alpha 2']].set_index('Country')['Alpha 2'].to_dict()
+iso_map = {'Taiwan': 'TW', 'Italy':'IT', 'China':'CN', 'USA/CO':'US', 'USA/CA':'US', 'USA/NY':'US', 'USA/WA':'US', 'USA/FL':'US'}
+iso_map.update(more_names)
+travel_df['FROM'] = travel_df['FROM'].apply(lambda x: iso_map.get(x) if iso_map.get(x) else x)
+travel_df['TO'] = travel_df['TO'].apply(lambda x: iso_map.get(x) if iso_map.get(x) else x)
+
 travel_df = travel_df.groupby('day_of_year').apply(lambda x: x.drop(['day_of_year'], axis=1).set_index('FROM').to_dict(orient='index'))
 travel_df.to_json('NECSI-TRAVELDATAVIZ-20200319-1957.json', orient='index')
 #
@@ -38,10 +46,12 @@ policy_df['DATE']=pd.to_datetime(policy_df.date1, format='%Y-%m-%d', errors='coe
 policy_df['day_of_year'] = policy_df['DATE'].dt.dayofyear + (policy_df['DATE'].dt.year - 2019) * 365
 policy_df['day_of_year'] = policy_df['day_of_year'].astype(int) 
 policy_df['day_of_year'] = policy_df['day_of_year'] - min_day
-policy_df.loc[policy_df['country'] == 'United States of America', 'country'] = 'US'
-policy_df.loc[policy_df['country'] == 'China', 'country'] = 'CN'
-policy_df.loc[policy_df['country'] == 'Italy', 'country'] = 'IT'
-policy_df.loc[policy_df['country'] == 'United Kingdom of Great Britain & Northern Ireland', 'country'] = 'UK'
+names = policy_df[['country']].drop_duplicates()
+more_names =  names.merge(iso_names, left_on='country', right_on='Country')[['Country', 'Alpha 2']].set_index('Country')['Alpha 2'].to_dict()
+iso_map = {'Taiwan': 'TW', 'Italy':'IT', 'China':'CN', 'USA/CO':'US', 'USA/CA':'US', 'USA/NY':'US', 'USA/WA':'US', 'USA/FL':'US', 'United Kingdom of Great Britain & Northern Ireland': 'UK', 'Iran (Islamic Republic of)': 'IR'}
+iso_map.update(more_names)
+policy_df['country'] = policy_df['country'].apply(lambda x: iso_map.get(x) if iso_map.get(x) else x)
+
 policy_df = policy_df.drop(['alltext', 'text'], axis=1)
 policy_df = policy_df.groupby('day_of_year').apply(lambda x: x.drop(['day_of_year'], axis=1).set_index('country').to_dict(orient='index'))
 policy_df.to_json('policy_act.json', orient='index')
@@ -70,8 +80,13 @@ time_df['day_of_year'] = time_df['day_of_year'].astype(int)
 # keep the min_day from above
 time_df['day_of_year'] = time_df['day_of_year'] - min_day
 time_df = time_df.drop(['Lat', 'Long'], axis=1)
-time_df.loc[time_df['Country/Region'] == 'China', 'Country/Region'] = 'CN'
-time_df.loc[time_df['Country/Region'] == 'Italy', 'Country/Region'] = 'IT'
+
+names = time_df[['Country/Region']].drop_duplicates()
+more_names =  names.merge(iso_names, left_on='Country/Region', right_on='Country')[['Country', 'Alpha 2']].set_index('Country')['Alpha 2'].to_dict()
+iso_map = {'Taiwan': 'TW', 'Italy':'IT', 'China':'CN', 'USA/CO':'US', 'USA/CA':'US', 'USA/NY':'US', 'USA/WA':'US', 'USA/FL':'US', 'United Kingdom of Great Britain & Northern Ireland': 'UK', 'Iran (Islamic Republic of)': 'IR'}
+iso_map.update(more_names)
+time_df['Country/Region'] = time_df['Country/Region'].apply(lambda x: iso_map.get(x) if iso_map.get(x) else x)
+
 time_df = time_df.groupby(['day_of_year', 'Country/Region']).sum().reset_index()
 
 
